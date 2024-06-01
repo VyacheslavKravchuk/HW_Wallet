@@ -1,7 +1,8 @@
 package com.example.wallet.entity;
 
-import jakarta.persistence.*;
+//import jakarta.persistence.*;
 
+import javax.persistence.*;
 import java.util.UUID;
 /**
  * Класс для сущности транзакций
@@ -24,6 +25,7 @@ public class WalletRequest {
     private WalletRegistered walletRegistered;
 
     public WalletRequest(Operation operationType, int amount) {
+        this.transactionId = getTransactionId();
         this.operationType = operationType;
         this.amount = amount;
     }
@@ -58,8 +60,8 @@ public class WalletRequest {
 
     @Override
     public String toString() {
-        return "Wallet{" +
-                "id=" + transactionId +
+        return "WalletRequest{" +
+                "transactionId=" + transactionId +
                 ", operationType=" + operationType +
                 ", amount=" + amount +
                 '}';

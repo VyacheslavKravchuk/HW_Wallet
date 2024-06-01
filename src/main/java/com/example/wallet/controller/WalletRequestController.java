@@ -1,5 +1,6 @@
 package com.example.wallet.controller;
 
+import com.example.wallet.entity.WalletRequest;
 import com.example.wallet.excaption.IllegalArgumentWalletException;
 import com.example.wallet.excaption.WalletRegisteredNotFoundException;
 import com.example.wallet.service.WalletRequestService;
@@ -9,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/v1/wallet")
+@RequestMapping("/wallet_requests")
 @Tag(name = "Интернет-кошелек", description = "Операции ввода-вывода средств")
 public class WalletRequestController {
     WalletRequestService walletRequestService;
@@ -18,27 +19,16 @@ public class WalletRequestController {
     }
 
     @PostMapping("/transaction")
-    public ResponseEntity<String> operationInputAndOutput(@RequestParam("wallet_id") String id,
+    public ResponseEntity<WalletRequest> operationInputAndOutput(@RequestParam("wallet_id") String id,
                                                                  @RequestParam("operationType") String operationType,
                                                                  @RequestParam("amount") int amount) {
         try {
-            walletRequestService.operationInputAndOutput(id, operationType, amount);
-            return ResponseEntity.ok().build();
+            WalletRequest walletRequest = walletRequestService.operationInputAndOutput(id, operationType, amount);
+            return ResponseEntity.ok(walletRequest);
         } catch (IllegalArgumentWalletException | WalletRegisteredNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Параметры запроса отсутствуют или имеют некорректный формат");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
-    @GetMapping("/balance")
-    ResponseEntity<String> operationGetBalance(@RequestParam("wallet_id") String id){
-        try {
-            walletRequestService.operationGetBalance(id);
-            return ResponseEntity.ok().build();
-        } catch (WalletRegisteredNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Пользователь с данным идентификатором не найден");
-        } catch (IllegalArgumentWalletException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Параметры запроса отсутствуют или имеют некорректный формат");
-        }
 
-    }
 }

@@ -7,5 +7,5 @@ public interface WalletRequestService {
                                           String operationType,
                                           int amount);
 
-    int operationGetBalance(String id);
+
 }

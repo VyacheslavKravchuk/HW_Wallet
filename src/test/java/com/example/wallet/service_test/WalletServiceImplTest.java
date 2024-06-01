@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -37,11 +38,11 @@ public class WalletServiceImplTest {
         String email = "test@example.com";
         String password = "password";
 
-        boolean result = walletService.createWallet(email, password);
-        boolean result2 = walletService.findByEmailWallet(email, password);
+        WalletRegistered result = walletService.createWallet(email, password);
+        WalletRegistered result2 = walletService.findByEmailWallet(email, password);
 
-        assertTrue(result);
-        assertTrue(result2);
+        assertTrue((BooleanSupplier) result);
+        assertTrue((BooleanSupplier) result2);
     }
 
     @Test

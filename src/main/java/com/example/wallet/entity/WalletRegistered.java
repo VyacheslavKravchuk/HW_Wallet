@@ -1,7 +1,8 @@
 package com.example.wallet.entity;
 
-import jakarta.persistence.*;
+//import jakarta.persistence.*;
 
+import javax.persistence.*;
 import java.util.UUID;
 
 /**
@@ -14,7 +15,7 @@ public class WalletRegistered {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "wallet_id", updatable = false, nullable = false)
-    private UUID walletId = UUID.randomUUID();
+    private UUID walletId;// = UUID.randomUUID();
 
     @Column(name = "balance")
     private int balance;
@@ -29,6 +30,7 @@ public class WalletRegistered {
         this.balance = 0;
         this.email = email;
         this.password = password;
+        this.walletId = getWalletId();
     }
 
     public WalletRegistered() {

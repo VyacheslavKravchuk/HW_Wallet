@@ -34,7 +34,6 @@ public class WalletRequestServiceImpl implements WalletRequestService {
         if (walletRegistered.isPresent()) {
             int balanceCurrent = walletRegistered.get().getBalance();
             Operation operation = Operation.parse(operationType);
-            WalletRequest walletRequest = new WalletRequest(operation, amount);
 
             if (operation == Operation.DEPOSIT) {
                 int newBalance = balanceCurrent + amount;
@@ -49,29 +48,13 @@ public class WalletRequestServiceImpl implements WalletRequestService {
                 throw new IllegalArgumentWalletException("Неверно указан тип операции");
             }
 
+            WalletRequest walletRequest = new WalletRequest(operation, amount);
             walletRepository.save(walletRegistered.get());
-            return walletRequestRepository.save(walletRequest);
+            walletRequestRepository.save(walletRequest);
+            return walletRequest;
         } else {
             throw new WalletRegisteredNotFoundException("Пользователь с идентификатором " + walletId + " не найден");
         }
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    @Override
-    public int operationGetBalance(String id) {
-        // Проверка валидности UUID
-        try {
-            UUID uuid = UUID.fromString(id);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentWalletException("Не валидный идентификатор");
-        }
-
-        // Поиск пользователя по UUID
-        Optional<WalletRegistered> walletRegistered = walletRepository.findById(UUID.fromString(id));
-        if (walletRegistered.isPresent()) {
-            return walletRegistered.get().getBalance();
-        } else {
-            throw new WalletRegisteredNotFoundException("Пользователь не найден");
-        }
-    }
 }

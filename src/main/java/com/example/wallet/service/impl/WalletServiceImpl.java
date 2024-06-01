@@ -25,32 +25,67 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public boolean createWallet(String email, String password) {
+    public WalletRegistered createWallet(String email, String password) {
         if (isValidEmail(email) && password!=null && !password.isEmpty()) {
             WalletRegistered walletRegistered = new WalletRegistered(email, password);
+
             walletRepository.save(walletRegistered);
-            return true;
+            return walletRegistered;
         } else {
             throw new IllegalArgumentWalletException("Не корректный формат данных");
         }
     }
 
-    @Override
-    public boolean findByEmailWallet(String email, String password) {
-        if (isValidEmail(email) && password!=null && !password.isEmpty()) {
-            WalletRegistered walletRegistered = new WalletRegistered(email, password);
-            walletRepository.findById(walletRegistered.getWalletId());
-            return true;
+    public WalletRegistered findByEmailWallet(String email, String password) {
+        if (isValidEmail(email) && password != null && !password.isEmpty()) {
+            Optional<WalletRegistered> existingWallet = walletRepository.findByEmail(email); // Ищем по email
+            if (existingWallet.isPresent()) {
+                WalletRegistered wallet = existingWallet.get();
+                if (wallet.getPassword().equals(password)) { // Сравниваем пароли
+                    return wallet;
+                } else {
+                    throw new IllegalArgumentWalletException("Неверный пароль");
+                }
+            } else {
+                throw new WalletRegisteredNotFoundException("Интернет-кошелек не зарегистрирован");
+            }
         } else {
             throw new IllegalArgumentWalletException("Не корректный формат данных");
         }
     }
+
+
     @Override
     public Optional<WalletRegistered> getWalletById(String walletId) {
         if (walletRepository.findById(UUID.fromString(walletId)).isPresent()) {
-            return walletRepository.findById(UUID.fromString(walletId));
+            Optional<WalletRegistered> walletRegistered = walletRepository.findById(UUID.fromString(walletId));
+
+            return walletRegistered;
         } else {
             throw new WalletRegisteredNotFoundException("Интернет-кошелек отсутствует");
+        }
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Override
+    public int operationGetBalance(String id) {
+        // Проверка валидности UUID
+        try {
+            UUID uuid = UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentWalletException("Не валидный идентификатор");
+        }
+
+        // Поиск пользователя по UUID
+        Optional<WalletRegistered> walletRegistered = walletRepository.findById(UUID.fromString(id));
+        if (walletRegistered.isPresent()) {
+            System.out.println(
+                    "Пользователь с id: "+id+" имеет баланс: "
+                            +walletRegistered.get().getBalance()
+            );
+            return walletRegistered.get().getBalance();
+        } else {
+            throw new WalletRegisteredNotFoundException("Пользователь не найден");
         }
     }
 
@@ -60,7 +95,6 @@ public class WalletServiceImpl implements WalletService {
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
     }
-
 
 
 }

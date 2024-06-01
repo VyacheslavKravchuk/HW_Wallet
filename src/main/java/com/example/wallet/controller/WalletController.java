@@ -1,54 +1,73 @@
 package com.example.wallet.controller;
 
 
+import com.example.wallet.entity.WalletRegistered;
 import com.example.wallet.excaption.IllegalArgumentWalletException;
 import com.example.wallet.excaption.WalletRegisteredNotFoundException;
 import com.example.wallet.service.WalletService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+//import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/wallets")
 @Tag(name = "Интернет-кошелек", description = "Создание кошелька")
 public class WalletController {
 
+
     private final WalletService walletService;
     public WalletController(WalletService walletService) {
         this.walletService = walletService;
     }
     @PostMapping("/register_wallet")
-    public ResponseEntity<String> registerWallet(@Valid @RequestParam("email") String email,
-                                                  @Valid @RequestParam("password") String password) {
+    public ResponseEntity<WalletRegistered> registerWallet(@RequestParam("email") String email,
+                                                           @RequestParam("password") String password) {
         try {
-            walletService.createWallet(email, password);
-            return ResponseEntity.ok().build();
+            WalletRegistered walletRegistered = walletService.createWallet(email, password);
+            return ResponseEntity.ok(walletRegistered);
         } catch (IllegalArgumentWalletException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Параметры запроса отсутствуют или имеют некорректный формат");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
+
     }
 
     @PostMapping("/login_wallet")
-    public ResponseEntity<String> loginWallet(@Valid @RequestParam("email") String email,
-                                                 @Valid @RequestParam("password") String password) {
+    public ResponseEntity<WalletRegistered> loginWallet(@RequestParam("email") String email,
+                                                        @RequestParam("password") String password) {
         try {
-            walletService.findByEmailWallet(email, password);
-            return ResponseEntity.ok().build();
+            WalletRegistered walletRegistered = walletService.findByEmailWallet(email, password);
+            return ResponseEntity.ok(walletRegistered);
         } catch (IllegalArgumentWalletException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Параметры запроса отсутствуют или имеют некорректный формат");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
-
     @GetMapping("{wallet_id}")
-    public ResponseEntity<String> getWalletById(@RequestParam("wallet_id") String walletId) {
+    public ResponseEntity<Optional<WalletRegistered>> getWalletById(@RequestParam("wallet_id") String walletId) {
         try {
-            walletService.getWalletById(walletId);
+            Optional<WalletRegistered> walletRegistered = walletService.getWalletById(walletId);
+            return ResponseEntity.ok(walletRegistered);
         } catch (WalletRegisteredNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+    }
+
+    @GetMapping("/balance")
+    ResponseEntity<String> operationGetBalance(@RequestParam("wallet_id") String id){
+        try {
+            Optional<WalletRegistered> walletRegistered = walletService.getWalletById(id);
+            return ResponseEntity.ok(String.valueOf(walletRegistered));
+
+        } catch (WalletRegisteredNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Пользователь с данным идентификатором не найден");
+        } catch (IllegalArgumentWalletException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Параметры запроса отсутствуют или имеют некорректный формат");
         }
-        return ResponseEntity.ok().build();
+
     }
 }
