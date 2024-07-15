@@ -2,6 +2,7 @@ package com.example.wallet.controller;
 
 
 import com.example.wallet.entity.WalletRegistered;
+import com.example.wallet.entity.WalletRegisteredRequest;
 import com.example.wallet.excaption.IllegalArgumentWalletException;
 import com.example.wallet.excaption.WalletRegisteredNotFoundException;
 import com.example.wallet.service.WalletService;
@@ -13,34 +14,35 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+
 @RestController
-@RequestMapping("/api/v1/wallets")
+@RequestMapping("/wallets")
 @Tag(name = "Интернет-кошелек", description = "Создание кошелька")
 public class WalletController {
-
 
     private final WalletService walletService;
     public WalletController(WalletService walletService) {
         this.walletService = walletService;
     }
+
     @PostMapping("/register_wallet")
-    public ResponseEntity<WalletRegistered> registerWallet(@RequestParam("email") String email,
-                                                           @RequestParam("password") String password) {
+    public ResponseEntity<WalletRegistered> registerWallet(@RequestBody WalletRegistered walletRegistered) {
         try {
-            WalletRegistered walletRegistered = walletService.createWallet(email, password);
-            return ResponseEntity.ok(walletRegistered);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(walletService.createWallet(walletRegistered));
         } catch (IllegalArgumentWalletException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-
     }
 
     @PostMapping("/login_wallet")
-    public ResponseEntity<WalletRegistered> loginWallet(@RequestParam("email") String email,
-                                                        @RequestParam("password") String password) {
+    public ResponseEntity<WalletRegisteredRequest> loginWallet(@RequestParam("email") String email,
+                                                               @RequestParam("password") String password) {
         try {
-            WalletRegistered walletRegistered = walletService.findByEmailWallet(email, password);
-            return ResponseEntity.ok(walletRegistered);
+            WalletRegisteredRequest walletRegisteredRequest = walletService
+                    .findByEmailWallet(email, password);
+            return ResponseEntity.ok(walletRegisteredRequest);
         } catch (IllegalArgumentWalletException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -51,7 +53,8 @@ public class WalletController {
         try {
             Optional<WalletRegistered> walletRegistered = walletService.getWalletById(walletId);
             return ResponseEntity.ok(walletRegistered);
-        } catch (WalletRegisteredNotFoundException e) {
+        }
+        catch (WalletRegisteredNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 

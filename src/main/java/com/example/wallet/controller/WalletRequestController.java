@@ -3,6 +3,7 @@ package com.example.wallet.controller;
 import com.example.wallet.entity.WalletRequest;
 import com.example.wallet.excaption.IllegalArgumentWalletException;
 import com.example.wallet.excaption.WalletRegisteredNotFoundException;
+import com.example.wallet.excaption.WalletRequestNotFoundException;
 import com.example.wallet.service.WalletRequestService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -19,16 +20,15 @@ public class WalletRequestController {
     }
 
     @PostMapping("/transaction")
-    public ResponseEntity<WalletRequest> operationInputAndOutput(@RequestParam("wallet_id") String id,
-                                                                 @RequestParam("operationType") String operationType,
-                                                                 @RequestParam("amount") int amount) {
+    public ResponseEntity<WalletRequest> operationInputAndOutput(@RequestParam("walletId") String id,
+                                                                 @RequestBody WalletRequest walletRequest) {
         try {
-            WalletRequest walletRequest = walletRequestService.operationInputAndOutput(id, operationType, amount);
-            return ResponseEntity.ok(walletRequest);
-        } catch (IllegalArgumentWalletException | WalletRegisteredNotFoundException e) {
+            WalletRequest result = walletRequestService.operationInputAndOutput(id, walletRequest);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentWalletException
+                 | WalletRegisteredNotFoundException
+                 | WalletRequestNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
-
-
 }

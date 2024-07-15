@@ -5,10 +5,12 @@ import com.example.wallet.entity.WalletRegistered;
 import com.example.wallet.entity.WalletRequest;
 import com.example.wallet.excaption.IllegalArgumentWalletException;
 import com.example.wallet.excaption.WalletRegisteredNotFoundException;
+import com.example.wallet.excaption.WalletRequestNotFoundException;
 import com.example.wallet.repository.WalletRepository;
 import com.example.wallet.repository.WalletRequestRepository;
 import com.example.wallet.service.WalletRequestService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -25,15 +27,16 @@ public class WalletRequestServiceImpl implements WalletRequestService {
         this.walletRequestRepository = walletRequestRepository;
     }
 
+    @Transactional  //(isolation = Isolation.READ_COMMITTED)
     @Override
-    public WalletRequest operationInputAndOutput(String walletId,
-                                                 String operationType, int amount) {
+    public WalletRequest operationInputAndOutput(String walletId, WalletRequest walletRequest) {
         Optional<WalletRegistered> walletRegistered = walletRepository
                 .findById(UUID.fromString(walletId));
 
-        if (walletRegistered.isPresent()) {
+        if (walletRequest!=null && walletRegistered.isPresent()) {
             int balanceCurrent = walletRegistered.get().getBalance();
-            Operation operation = Operation.parse(operationType);
+            Operation operation = walletRequest.getOperationType();
+            int amount = walletRequest.getAmount();
 
             if (operation == Operation.DEPOSIT) {
                 int newBalance = balanceCurrent + amount;
@@ -48,13 +51,18 @@ public class WalletRequestServiceImpl implements WalletRequestService {
                 throw new IllegalArgumentWalletException("Неверно указан тип операции");
             }
 
-            WalletRequest walletRequest = new WalletRequest(operation, amount);
-            walletRepository.save(walletRegistered.get());
+            walletRequest.setWalletRegistered(walletRegistered.get());
             walletRequestRepository.save(walletRequest);
             return walletRequest;
-        } else {
-            throw new WalletRegisteredNotFoundException("Пользователь с идентификатором " + walletId + " не найден");
+        } else if (walletRequest == null) {
+            throw new WalletRequestNotFoundException("Запрос отсутствует");
+
+        }
+        else {
+            throw new WalletRegisteredNotFoundException("Пользователь с идентификатором "
+                    + walletId + " не найден");
         }
     }
 
 }
+

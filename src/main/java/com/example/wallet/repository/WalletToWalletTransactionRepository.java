@@ -1,6 +1,6 @@
 package com.example.wallet.repository;
 
-import com.example.wallet.entity.WalletRequest;
+import com.example.wallet.entity.WalletToWalletTransaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Repository;
@@ -10,8 +10,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface WalletRequestRepository extends JpaRepository<WalletRequest, UUID> {
+public interface WalletToWalletTransactionRepository
+        extends JpaRepository<WalletToWalletTransaction, UUID> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<WalletRequest> findById(UUID uuid);
+    Optional<WalletToWalletTransaction> findById(UUID uuid);
 }

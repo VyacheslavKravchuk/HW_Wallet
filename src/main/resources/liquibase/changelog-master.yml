@@ -3,3 +3,5 @@ databaseChangeLog:
       file: liquibase/scripts/walletRegistered.sql
   - include:
       file: liquibase/scripts/walletRequest.sql
+  - include:
+      file: liquibase/scripts/walletToWalletTransaction.sql

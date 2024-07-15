@@ -1,6 +1,7 @@
 package com.example.wallet.service.impl;
 
 import com.example.wallet.entity.WalletRegistered;
+import com.example.wallet.entity.WalletRegisteredRequest;
 import com.example.wallet.excaption.IllegalArgumentWalletException;
 import com.example.wallet.excaption.WalletRegisteredNotFoundException;
 import com.example.wallet.repository.WalletRepository;
@@ -25,10 +26,11 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public WalletRegistered createWallet(String email, String password) {
-        if (isValidEmail(email) && password!=null && !password.isEmpty()) {
-            WalletRegistered walletRegistered = new WalletRegistered(email, password);
+    public WalletRegistered createWallet(WalletRegistered walletRegistered) {
 
+        if (isValidEmail(walletRegistered.getEmail()) &&
+                walletRegistered.getPassword()!=null &&
+                !walletRegistered.getPassword().isEmpty()) {
             walletRepository.save(walletRegistered);
             return walletRegistered;
         } else {
@@ -36,12 +38,15 @@ public class WalletServiceImpl implements WalletService {
         }
     }
 
-    public WalletRegistered findByEmailWallet(String email, String password) {
+
+    public WalletRegisteredRequest findByEmailWallet(String email, String password) {
         if (isValidEmail(email) && password != null && !password.isEmpty()) {
             Optional<WalletRegistered> existingWallet = walletRepository.findByEmail(email); // Ищем по email
             if (existingWallet.isPresent()) {
-                WalletRegistered wallet = existingWallet.get();
-                if (wallet.getPassword().equals(password)) { // Сравниваем пароли
+
+                WalletRegisteredRequest wallet = new WalletRegisteredRequest(email,
+                        password, existingWallet.get().getBalance());
+                if (wallet.getPassword().equals(password)) {
                     return wallet;
                 } else {
                     throw new IllegalArgumentWalletException("Неверный пароль");
@@ -97,4 +102,6 @@ public class WalletServiceImpl implements WalletService {
     }
 
 
+
 }
+

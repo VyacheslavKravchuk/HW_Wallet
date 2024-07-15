@@ -5,7 +5,7 @@ package com.example.wallet.entity;
 import javax.persistence.*;
 import java.util.UUID;
 /**
- * Класс для сущности транзакций
+ * Класс для сущности транзакций одного пользователя по своему кошельку
  */
 @Entity
 @Table(name = "wallet_request")
@@ -21,16 +21,19 @@ public class WalletRequest {
     private int amount;
 
     @ManyToOne
-    @JoinColumn(name = "wallet_id")
+    @JoinColumn(name = "wallet_id", referencedColumnName = "wallet_id")
     private WalletRegistered walletRegistered;
 
     public WalletRequest(Operation operationType, int amount) {
-        this.transactionId = getTransactionId();
         this.operationType = operationType;
         this.amount = amount;
     }
 
     public WalletRequest() {
+    }
+
+    public void setOperationType(Operation operationType) {
+        this.operationType = operationType;
     }
 
     public WalletRegistered getWalletRegistered() {
@@ -53,16 +56,18 @@ public class WalletRequest {
         return amount;
     }
 
+    public void setTransactionId(UUID transactionId) {
+        this.transactionId = transactionId;
+    }
+
     public void setAmount(int amount) {
         this.amount = amount;
     }
 
-
     @Override
     public String toString() {
         return "WalletRequest{" +
-                "transactionId=" + transactionId +
-                ", operationType=" + operationType +
+                "operationType=" + operationType +
                 ", amount=" + amount +
                 '}';
     }
